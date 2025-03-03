@@ -13,7 +13,7 @@ class TenantRegistrationView(generics.CreateAPIView):
         serializer.is_valid()
 
         tenant, domain_name = serializer.save()
-        breakpoint()
+        # breakpoint()
         
         response = {
             "tenant": {
