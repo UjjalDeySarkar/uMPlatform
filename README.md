@@ -6,9 +6,13 @@ commands are for linux(dabian based with apt)
 
 *simple installation with a third party personal package manager(ppa):
 sudo apt update
+
 sudo apt install software-properties-common
+
 sudo add-apt-repository ppa:deadsnakes/ppa
+
 sudo apt update
+
 sudo apt install python3.13
 
 #2 install pipenv 
@@ -24,11 +28,17 @@ sudo apt install pipenv
 #5 create a .env file in the project root and define the following env variables 
 
 POSTGRES_USER
+
 POSTGRES_PASSWORD
+
 POSTGRES_DB
+
 POSTGRES_HOST
+
 POSTGRES_PORT
+
 POSTGRES_READY
+
 DJANGO_SECRET_KEY
 
 
