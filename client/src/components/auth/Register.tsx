@@ -91,7 +91,7 @@ const RegisterPage: React.FC = () => {
       );
 
       setSubmitMessage('Registration successful! Redirecting...');
-      navigate('/login', { state: { responseData: response.data, postUrl: location.state?.postUrl} });
+      navigate('/login', { state: { responseData: response.data, postUrl: location.state?.postUrl, firstTime: true} });
       
       setTimeout(() => console.log('Registered successfully', response.data), 1500);
     } catch (error) {

@@ -22,6 +22,15 @@ const LoginPage: React.FC = () => {
         if (location.state && (location.state as any).responseData) {
             const { message } = (location.state as any).responseData;
             toast.success(message, { autoClose: 6000 });
+            if (location.state?.firstTime === true) {
+                toast(
+                    <div>
+                      <p>Please verify your account.</p>
+                      <button>Resend Email</button>
+                    </div>, 
+                    { autoClose: 15000 }
+                  );
+            }
         }
     }, [location]);
 

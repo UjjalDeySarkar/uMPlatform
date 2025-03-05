@@ -4,8 +4,8 @@ import './EmailConformation.css';
 
 const EmailConformation = () => {
     const [searchParams] = useSearchParams();
-    const domain = searchParams.get('domain'); // e.g. "nxt"
-    const id = searchParams.get('id'); // e.g. "3"
+    const domain = searchParams.get('domain'); 
+    const id = searchParams.get('id'); 
     const [loading, setLoading] = useState(true);
     const [responseMessage, setResponseMessage] = useState('');
     const [error, setError] = useState(String);
