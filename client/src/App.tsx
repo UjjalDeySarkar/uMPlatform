@@ -12,7 +12,6 @@ function App() {
           <Route path='/org/register' Component={TenantRegister}/>
           <Route path='/register' Component={RegisterPage}/>
           <Route path='/login' Component={LoginPage} />
-          {/* The /activate route expects query parameters, e.g., /activate?domain=nxt&id=3 */}
           <Route path="/activate" element={<EmailConformation />} />
       </Routes>
     </Router>
