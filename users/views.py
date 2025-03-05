@@ -9,6 +9,8 @@ from .serializers import (
     TeamSerializer,
     TeamDetailSerializer
 )
+from .utils import send_welcome_email  # Import the email function
+from django.db import transaction
 
 User = get_user_model()
 
@@ -21,21 +23,33 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        
-        # Create response data
-        data = {
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name
-            },
-            "message": "User registered successfully"
-        }
+        with transaction.atomic():
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            
+            try:
+                # Call the email function
+                message = f"Hello {user.first_name},\n\nThank you for registering with us!\n\nBest Regards,\nYour Team"
+                send_welcome_email(user.email, "Welcome to Our Platform", message)
+            except Exception as e:
+                transaction.set_rollback(True)
+                return Response(
+                    {"status": "FAILED", "error": "User registration failed due to email error."}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            # Create response data
+            data = {
+                "user": {
+                    "id": user.id
+                    # "username": user.username,
+                    # "email": user.email,
+                    # "first_name": user.first_name,
+                    # "last_name": user.last_name
+                },
+                "status": "SUCCESS",
+                "message": "User registered successfully"
+            }
         
         return Response(data, status=status.HTTP_201_CREATED)
 
