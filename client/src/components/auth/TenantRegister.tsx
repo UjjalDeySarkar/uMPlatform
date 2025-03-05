@@ -58,7 +58,7 @@ const TenantRegister: React.FC = () => {
     try {
       const response = await axios.post<DataResponse>(`${config.API_BASE_URL}/register/`, formData);
       toast.success(response.data.message);
-      navigate('/login', { state: { responseData: response.data } });
+      navigate('/register', { state: { responseData: response.data, postUrl: response.data.tenant.domain } });
 
     } catch (err) {
       if (axios.isAxiosError(err)) {
