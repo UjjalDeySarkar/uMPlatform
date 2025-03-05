@@ -2,6 +2,7 @@ import './App.css'
 import LoginPage from './components/auth/Login'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import TenantRegister from './components/auth/TenantRegister';
+import EmailConformation from './components/auth/EmailConformation';
 import RegisterPage from './components/auth/Register';
 
 function App() {
@@ -11,6 +12,8 @@ function App() {
           <Route path='/org/register' Component={TenantRegister}/>
           <Route path='/register' Component={RegisterPage}/>
           <Route path='/login' Component={LoginPage} />
+          {/* The /activate route expects query parameters, e.g., /activate?domain=nxt&id=3 */}
+          <Route path="/activate" element={<EmailConformation />} />
       </Routes>
     </Router>
   );
