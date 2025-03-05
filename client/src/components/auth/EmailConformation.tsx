@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import './EmailConformation.css';
 
 const EmailConformation = () => {
     const [searchParams] = useSearchParams();
-    const domain = searchParams.get('domain'); // e.g. "nxt"
-    const id = searchParams.get('id'); // e.g. "3"
+    const domain = searchParams.get('domain'); 
+    const id = searchParams.get('id'); 
     const [loading, setLoading] = useState(true);
     const [responseMessage, setResponseMessage] = useState('');
     const [error, setError] = useState(String);
+    // Create a ref to ensure the effect runs only once
+    const didRunRef = useRef(false);
 
   useEffect(() => {
+    if (didRunRef.current) return;
+    didRunRef.current = true;
 
     if (!id) {
         setError('No activation id provided.');
