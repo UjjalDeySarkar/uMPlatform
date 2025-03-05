@@ -2,6 +2,7 @@ import './App.css'
 import LoginPage from './components/auth/Login'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import TenantRegister from './components/auth/TenantRegister';
+import EmailConformation from './components/auth/EmailConformation';
 
 function App() {
   return (
@@ -9,6 +10,8 @@ function App() {
       <Routes>
           <Route path='/org/register' Component={TenantRegister}/>
           <Route path='/login' Component={LoginPage} />
+          {/* The /activate route expects query parameters, e.g., /activate?domain=nxt&id=3 */}
+          <Route path="/activate" element={<EmailConformation />} />
       </Routes>
     </Router>
   );

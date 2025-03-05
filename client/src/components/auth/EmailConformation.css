@@ -1,0 +1,57 @@
+/* EmailConformation.css */
+
+.confirmation-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #f4f7f9;
+    padding: 20px;
+  }
+  
+  .confirmation-container {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .loading {
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  .alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+  }
+  
+  .alert-error {
+    background-color: #ffe5e5;
+    color: #d8000c;
+  }
+  
+  .alert-info {
+    background-color: #e5f6ff;
+    color: #00529b;
+  }
+  
+  .alert-success {
+    background-color: #e5ffe5;
+    color: #4f8a10;
+  }
+  
+  h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+  
+  p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+  }
+  

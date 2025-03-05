@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, views
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
@@ -30,7 +31,16 @@ class RegisterView(generics.CreateAPIView):
             
             try:
                 # Call the email function
-                message = f"Hello {user.first_name},\n\nThank you for registering with us!\n\nBest Regards,\nYour Team"
+                host = request.get_host().split(".")[0]  # Extract subdomain
+                # Construct the activation URL
+                activation_url = f"http://localhost:5173/activate?domain={host}&id={user.id}/"
+                # Email message
+                message = (
+                    f"Hello {user.first_name},\n\n"
+                    "Thank you for registering with us!\n\n"
+                    f"Click on the link below to activate your account:\n{activation_url}\n\n"
+                    "Best Regards,\nYour Team"
+                )
                 send_welcome_email(user.email, "Welcome to Our Platform", message)
             except Exception as e:
                 transaction.set_rollback(True)
@@ -160,3 +170,21 @@ class TeamViewSet(viewsets.ModelViewSet):
                 {"detail": "Workspace not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class ActivateUserView(views.APIView):
+    permission_classes = [permissions.AllowAny]  # Allow activation without authentication
+    
+    def get(self, request, user_id, *args, **kwargs):
+        # Fetch user or return 404 if not found
+        user = get_object_or_404(User, id=user_id)
+        
+        if user.is_active:
+            return Response({"message": "User is already active."}, status=status.HTTP_200_OK)
+        
+        # Activate the user
+        user.is_active = True
+        user.save()
+
+        return Response({"message": "User activated successfully."}, status=status.HTTP_200_OK)
+        
+    
