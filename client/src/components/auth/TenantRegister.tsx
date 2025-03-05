@@ -1,16 +1,36 @@
 import { useState } from "react";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import config from "../../config";
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+interface TenantRegistrationFormData {
+  schema_name: string,
+  name: string,
+}
+
+interface Tenant {
+  id: number;
+  name: string;
+  domain: string;
+}
+
+interface DataResponse {
+  tenant: Tenant;
+  message: string;
+}
 
 const TenantRegister: React.FC = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TenantRegistrationFormData>({
     schema_name: "",
     name: "",
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -36,10 +56,27 @@ const TenantRegister: React.FC = () => {
     setError(null);
 
     try {
-      await axios.post(`${config.API_BASE_URL}/register/`, formData);
-      alert("Tenant registration successful!");
+      const response = await axios.post<DataResponse>(`${config.API_BASE_URL}/register/`, formData);
+      toast.success(response.data.message);
+      navigate('/login', { state: { responseData: response.data } });
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError;
+        if (axiosError.response && axiosError.response.status === 400) {
+          const errorData = axiosError.response.data as {
+            [key: string]: string[];
+          };
+          const errorMessages = Object.values(errorData)
+            .flat()
+            .join(" ");
+          if (errorMessages == "tenant with this schema name already exists.") {
+            toast.error("this subdomain is taken");
+          }
+        } else {
+          setError("Registration failed. Please try again.");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -84,6 +121,7 @@ const TenantRegister: React.FC = () => {
             {loading ? "Processing..." : "Register"}
           </button>
         </form>
+        <ToastContainer position="top-right" autoClose={6000} />
       </div>
     </div>
   );

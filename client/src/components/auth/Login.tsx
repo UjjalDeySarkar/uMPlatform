@@ -1,6 +1,10 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import config from "../../config";
 import axios from 'axios';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 // Define the form data type for signin
 interface LoginFormData {
@@ -9,6 +13,17 @@ interface LoginFormData {
 }
 
 const LoginPage: React.FC = () => {
+    const location = useLocation();
+
+    useEffect(() => {
+      // Check if the location state contains response data with a message
+      if (location.state && (location.state as any).responseData) {
+        const { message } = (location.state as any).responseData;
+        toast.success(message, { autoClose: 6000 }); // display for 6000ms
+      }
+    }, [location]);
+
+    
     // Initialize form state
     const [formData, setFormData] = useState<LoginFormData>({
         username: '',
@@ -63,7 +78,7 @@ const LoginPage: React.FC = () => {
         try {
             // Send the login request
             const response = await axios.post(
-                `${config.API_BASE_URL}/login`,
+                `${config.API_BASE_URL}/api-auth/login/`,
                 formData,
                 {
                     headers: {
