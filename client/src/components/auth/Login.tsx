@@ -1,12 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import config from "../../config";
 import axios from 'axios';
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
-// Define the form data type for signin
 interface LoginFormData {
     username: string;
     password: string;
@@ -14,120 +12,80 @@ interface LoginFormData {
 
 const LoginPage: React.FC = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    // Retrieve dynamic POST URL from the location state, or use default endpoint
+    const dynamicPostUrl = `http://${location.state?.postUrl}:8000/api/token/` || `${config.API_BASE_URL}/api-auth/login/`;
 
     useEffect(() => {
-      // Check if the location state contains response data with a message
-      if (location.state && (location.state as any).responseData) {
-        const { message } = (location.state as any).responseData;
-        toast.success(message, { autoClose: 6000 }); // display for 6000ms
-      }
+        // If location.state contains response data with a message, display it as a toast
+        if (location.state && (location.state as any).responseData) {
+            const { message } = (location.state as any).responseData;
+            toast.success(message, { autoClose: 6000 });
+        }
     }, [location]);
 
-    
-    // Initialize form state
-    const [formData, setFormData] = useState<LoginFormData>({
-        username: '',
-        password: '',
-    });
-
-    // State for form submission status and errors
+    const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [submitMessage, setSubmitMessage] = useState<string>('');
 
-    // Handle input changes for text fields
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
-
-        // Clear error for this field when user starts typing
+        setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
         if (errors[name]) {
-            setErrors({
-                ...errors,
-                [name]: ''
-            });
+            setErrors({ ...errors, [name]: '' });
         }
     };
 
-    // Validate form before submission
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
-
-        // Required field validation
         if (!formData.username.trim()) newErrors.username = 'Username or email is required';
         if (!formData.password) newErrors.password = 'Password is required';
-
-        // Set errors and return validation result
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle form submission
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-
-        // Validate form
         if (!validateForm()) return;
 
         setIsLoading(true);
-        setSubmitMessage('');
 
         try {
-            // Send the login request
-            const response = await axios.post(
-                `${config.API_BASE_URL}/api-auth/login/`,
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-            // Handle successful login
-            setSubmitMessage('Login successful! Redirecting...');
+            const response = await axios.post(dynamicPostUrl, formData, {
+                headers: { 'Content-Type': 'application/json' }
+            });
 
             // Store authentication token if provided by the API
             if (response.data && response.data.token) {
                 localStorage.setItem('authToken', response.data.token);
             }
 
-            // Redirect to dashboard or home page
+            toast.success('Login successful! Redirecting...', { autoClose: 6000 });
+
+            // Redirect to dashboard (or any other page) after a short delay
             setTimeout(() => {
-                // window.location.href = '/dashboard';
-                console.log('Logged in successfully', response.data);
+                navigate('/dashboard');
             }, 1500);
-
         } catch (error) {
-            // Handle errors
             if (axios.isAxiosError(error) && error.response) {
-                // API returned error response
-                const serverErrors = error.response.data;
-
                 if (error.response.status === 401) {
-                    setSubmitMessage('Invalid username or password');
+                    toast.error('Invalid username or password', { autoClose: 6000 });
                 } else {
-                    setSubmitMessage(`Login failed: ${error.response.statusText}`);
+                    toast.error(`Login failed: ${error.response.statusText}`, { autoClose: 6000 });
                 }
-
-                // If server returns validation errors, update the errors state
+                const serverErrors = error.response.data;
                 if (typeof serverErrors === 'object') {
                     setErrors(prev => ({ ...prev, ...serverErrors }));
                 }
             } else {
-                // Network or other error
-                setSubmitMessage('Login failed. Please try again later.');
-                console.error('Login error:', error);
+                toast.error('Login failed. Please try again later.', { autoClose: 6000 });
             }
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Handle forgot password click
     const handleForgotPassword = (e: React.MouseEvent) => {
         e.preventDefault();
         console.log('Navigate to forgot password page');
@@ -142,15 +100,8 @@ const LoginPage: React.FC = () => {
                     </h2>
                 </div>
 
-                {submitMessage && (
-                    <div className={`p-4 rounded-md ${submitMessage.includes('successful') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-                        {submitMessage}
-                    </div>
-                )}
-
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md shadow-sm space-y-4">
-                        {/* Username/Email field */}
                         <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                                 Username or Email
@@ -169,7 +120,6 @@ const LoginPage: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Password field */}
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
@@ -190,7 +140,6 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-
                         <div className="text-sm">
                             <a
                                 href="#"
@@ -211,13 +160,8 @@ const LoginPage: React.FC = () => {
                             {isLoading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </div>
-
-                    <div className="text-sm text-center">
-                        <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                            Don't have an account? Sign up
-                        </a>
-                    </div>
                 </form>
+                <ToastContainer position="top-right" autoClose={6000} />
             </div>
         </div>
     );
