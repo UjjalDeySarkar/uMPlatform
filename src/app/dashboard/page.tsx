@@ -19,11 +19,12 @@ export default async function Page() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
 
-  const user = data?.user?.user_metadata
+  // const user = data?.user?.user_metadata
+  const user = {}
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user}/>
+      <AppSidebar user={user} className="pt-10"/>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">

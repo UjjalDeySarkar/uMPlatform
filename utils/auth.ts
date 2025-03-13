@@ -45,5 +45,7 @@ export const auth = {
   },
   login: async () => {},
   signInWithOAuth: async () => {},
-  logout: async () => {},
+  logout: async () => {
+    
+  },
 };

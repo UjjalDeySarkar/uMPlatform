@@ -18,7 +18,7 @@ export const Header = ({ className }: HeaderProps) => {
         className
       )}
     >
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-10 items-center justify-between">
         <Link
           href={"/"}
           className="flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors"
