@@ -19,8 +19,8 @@ export default async function Page() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
 
-  // const user = data?.user?.user_metadata
-  const user = {}
+  const user = data?.user?.user_metadata
+  // const user = {}
 
   return (
     <SidebarProvider>

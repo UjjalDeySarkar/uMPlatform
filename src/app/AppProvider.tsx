@@ -12,7 +12,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div className="h-16">
+        <div className="h-10">
           <Header />
         </div>
         {children}

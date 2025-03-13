@@ -48,7 +48,7 @@ export const Header = ({ className }: HeaderProps) => {
       <div className="container flex h-10 items-center justify-between">
         <Link
           href={"/"}
-          className="flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors"
+          className="flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors m-4"
         >
           UnManage AI
         </Link>
@@ -63,14 +63,11 @@ export const Header = ({ className }: HeaderProps) => {
                   <Button variant="ghost" asChild>
                     <Link href="/login">Sign in</Link>
                   </Button>
-                  <Button asChild>
-                    <Link href="/create-account">Get Started</Link>
-                  </Button>
                 </>
               )}
             </div>
           )}
-          <div className="border-l pl-4 dark:border-gray-800">
+          <div className="border-l pl-4 dark:border-gray-800 m-4">
             <ThemeToggle />
           </div>
         </div>
