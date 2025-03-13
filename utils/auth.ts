@@ -45,5 +45,9 @@ export const auth = {
   },
   login: async () => {},
   signInWithOAuth: async () => {},
-  logout: async () => {},
+  signOut: async () => {
+    const { error } = await supabase.auth.signOut();
+    // useAccessStore.getState().reset();
+    if (error) throw { message: error.message, status: error.status };
+  },
 };

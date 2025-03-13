@@ -1,11 +1,11 @@
 "use client";
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import type { User } from '@supabase/supabase-js';
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "../../utils/supabase/client";
 
 const features = [
@@ -21,14 +21,14 @@ export const LandingPage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   React.useEffect(() => {
     setTheme(resolvedTheme); // Set theme only after hydration
   }, [resolvedTheme]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+      setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
@@ -66,7 +66,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {user ? (
+            {user ? (
               <Button size="lg" asChild>
                 <Link href="/projects" className="gap-2">
                   View Projects <ArrowRight className="h-4 w-4" />
