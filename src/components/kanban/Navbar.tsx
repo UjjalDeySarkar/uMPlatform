@@ -1,16 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Menu, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Navbar: React.FC = () => {
-  const router = useRouter();
+  const pathname = usePathname(); // Get the current path
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const currentPath = window.location.pathname; // Use window for current path since useRouter doesn't provide pathname directly in Next.js App Router
 
   return (
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50">
@@ -28,7 +26,7 @@ const Navbar: React.FC = () => {
           <Link 
             href="/" 
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              currentPath === '/' ? 'text-primary' : 'text-muted-foreground'
+              pathname === '/' ? 'text-primary' : 'text-muted-foreground'
             }`}
           >
             Dashboard
@@ -36,7 +34,7 @@ const Navbar: React.FC = () => {
           <Link 
             href="/projects" 
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              currentPath.includes('/projects') ? 'text-primary' : 'text-muted-foreground'
+              pathname.includes('/projects') ? 'text-primary' : 'text-muted-foreground'
             }`}
           >
             Projects
@@ -71,7 +69,7 @@ const Navbar: React.FC = () => {
             <Link 
               href="/" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                currentPath === '/' ? 'text-primary' : 'text-muted-foreground'
+                pathname === '/' ? 'text-primary' : 'text-muted-foreground'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -80,7 +78,7 @@ const Navbar: React.FC = () => {
             <Link 
               href="/projects" 
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                currentPath.includes('/projects') ? 'text-primary' : 'text-muted-foreground'
+                pathname.includes('/projects') ? 'text-primary' : 'text-muted-foreground'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -94,4 +92,3 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-

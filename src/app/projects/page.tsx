@@ -1,10 +1,11 @@
+'use client'
 import React from 'react';
 import Link from 'next/link';
 import Layout from '@/components/kanban/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { boardService } from '@/services/boardService';
+import { boardService } from '@/utils/boardService';
 import { Project } from '@/types/kanban';
 
 const Projects = () => {
