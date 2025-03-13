@@ -1,10 +1,12 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
+import { createClient } from "../../utils/supabase/client";
 
 const features = [
   "Intuitive Kanban boards",
@@ -16,10 +18,32 @@ const features = [
 export const LandingPage: React.FC = () => {
   const { resolvedTheme } = useTheme();
   const [theme, setTheme] = React.useState<string | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+  const [isLoading, setIsLoading] = useState(true);
 
   React.useEffect(() => {
     setTheme(resolvedTheme); // Set theme only after hydration
   }, [resolvedTheme]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
@@ -42,16 +66,24 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <>
+            {user ? (
               <Button size="lg" asChild>
-                <Link href="/create-account" className="gap-2">
-                  Get Started <ArrowRight className="h-4 w-4" />
+                <Link href="/projects" className="gap-2">
+                  View Projects <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/login">Sign in</Link>
-              </Button>
-            </>
+            ) : (
+              <>
+                <Button size="lg" asChild>
+                  <Link href="/create-account" className="gap-2">
+                    Get Started <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/login">Sign in</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4 pt-4 max-w-[600px] mx-auto">

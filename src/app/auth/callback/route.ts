@@ -1,4 +1,5 @@
 import { createClient } from '../../../../utils/supabase/server'; 
+import { users } from '../../../../utils/users';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -13,11 +14,20 @@ export async function GET(request: Request) {
       }
   
       const supabase = await createClient();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const {data, error } = await supabase.auth.exchangeCodeForSession(code);
   
       if (error) {
         console.error('Auth error:', error);
         throw error;
+      }
+
+      if (data.user) {
+        try {
+          await users.captureUserDetails(data.user);
+        } catch (error) {
+          console.error('Error capturing user details:', error);
+          // Don't throw here - we still want to complete the auth flow
+        }
       }
         
       // Redirect to the intended page
