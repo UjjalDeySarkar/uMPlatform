@@ -13,11 +13,41 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { auth } from "../../../utils/auth";
+import { getAuthError } from "../../../utils/auth-errors";
+import { Icons } from "@/components/Icons";
 
 export function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await auth.signIn(email, password);
+      router.push('/projects');
+      router.refresh();
+    } catch (error) {
+      console.error('Auth error:', error);
+      const { message } = getAuthError(error);
+      
+      toast("Authentication Error", {
+        description: message,
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <Card className="w-96">
-      <form>
+      <form  onSubmit={handleSubmit}>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Log in</CardTitle>
           <CardDescription className="text-xs">Welcome back</CardDescription>
@@ -36,6 +66,9 @@ export function LoginForm() {
               id="email"
               type="email"
               placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
               required
             />
           </div>
@@ -49,12 +82,17 @@ export function LoginForm() {
             <Input
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
               required
             />
           </div>
 
-          <Button className="w-full" type="submit">
-            
+          <Button className="w-full" type="submit"disabled={isLoading} >
+          {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Sign In
           </Button>
         </CardContent>
