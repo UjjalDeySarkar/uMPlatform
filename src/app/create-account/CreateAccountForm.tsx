@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Icons } from '@/components/Icons';
-import { Button } from '@/components/ui/button';
-import { getAuthError } from '../../../utils/auth-errors';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/Icons";
+import { Button } from "@/components/ui/button";
+import { getAuthError } from "../../../utils/auth-errors";
 import {
   Card,
   CardContent,
@@ -12,19 +12,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Link from 'next/link';
-import { OAuthSignIn } from '@/components/auth/OAuthSignIn';
-import { toast } from 'sonner';
-import { auth } from '../../../utils/auth';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { OAuthSignIn } from "@/components/auth/OAuthSignIn";
+import { toast } from "sonner";
+import { auth } from "../../../utils/auth";
 
 export function CreateAccountForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setconfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setconfirmPassword] = useState("");
   const router = useRouter();
 
   const handleCreateAccount = async (
@@ -34,8 +34,8 @@ export function CreateAccountForm() {
     console.log(email);
 
     if (password != confirmPassword) {
-      toast('Validation Error', {
-        description: 'Passwords do not match',
+      toast("Validation Error", {
+        description: "Passwords do not match",
       });
       return;
     }
@@ -43,13 +43,13 @@ export function CreateAccountForm() {
     try {
       setIsLoading(true);
       await auth.signUp(email, password);
-      toast('Success', {
-        description: 'Please check your email to verify your account.',
+      toast("Success", {
+        description: "Please check your email to verify your account.",
       });
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
       const { message } = getAuthError(error);
-      toast('Account Creation Error', {
+      toast("Account Creation Error", {
         description: message,
       });
     } finally {
@@ -67,7 +67,7 @@ export function CreateAccountForm() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <div>
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/login" className="text-blue-500">
               Login
             </Link>
