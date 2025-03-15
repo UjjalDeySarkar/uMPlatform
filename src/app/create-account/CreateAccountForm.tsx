@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Icons } from "@/components/Icons";
-import { Button } from "@/components/ui/button";
-import { getAuthError } from "../../../utils/auth-errors";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Icons } from '@/components/Icons';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -12,53 +11,46 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { OAuthSignIn } from "@/components/auth/OAuthSignIn";
-import { toast } from "sonner";
-import { auth } from "../../../utils/auth";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
+import { auth } from '../../../utils/auth';
+import { toast } from 'sonner'; 
+import { getAuthError } from '../../../utils/auth-errors';
+import { OAuthSignIn } from '@/components/auth/OAuthSignIn';
 
 export function CreateAccountForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setconfirmPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
 
-  const handleCreateAccount = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
-    console.log(email);
-
-    if (password != confirmPassword) {
-      toast("Validation Error", {
-        description: "Passwords do not match",
-      });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
     try {
       setIsLoading(true);
       await auth.signUp(email, password);
-      toast("Success", {
-        description: "Please check your email to verify your account.",
-      });
-      router.push("/login");
+      toast.success('Please check your email to verify your account.');
+      router.push('/login');
     } catch (error) {
       const { message } = getAuthError(error);
-      toast("Account Creation Error", {
-        description: message,
-      });
+
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <Card className="w-96">
-      <form onSubmit={handleCreateAccount}>
+      <form onSubmit={handleSubmit}>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription className="text-xs">
@@ -67,7 +59,7 @@ export function CreateAccountForm() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <div>
-            Already have an account?{" "}
+            Already have an account?{' '}
             <Link href="/login" className="text-blue-500">
               Login
             </Link>
@@ -102,7 +94,7 @@ export function CreateAccountForm() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setconfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -116,7 +108,7 @@ export function CreateAccountForm() {
           </Button>
         </CardContent>
         <CardFooter>
-          <OAuthSignIn />
+          <OAuthSignIn isLoading={isLoading} onLoadingChange={setIsLoading} />
         </CardFooter>
       </form>
     </Card>

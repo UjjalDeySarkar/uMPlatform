@@ -27,7 +27,7 @@ export const users = {
       .from('users')
       .select('*')
       .eq('id', id)
-      .maybeSingle();
+      .single();
 
     if (error) throw error;
     return data as IUser | null;
@@ -82,6 +82,7 @@ export const users = {
     userId: string,
     updates: Partial<Omit<IUser, 'id' | 'email' | 'provider'>>
   ) {
+    debugger
     const { error } = await supabase
       .from('users')
       .update(updates)
