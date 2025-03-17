@@ -15,11 +15,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { auth } from "../../../utils/auth";
+import { toast } from "sonner";
+import { getAuthError } from "../../../utils/auth-errors";
 
 export function ForgotPasswordForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      const response = await auth.resetPasswordRequest(email);
+      toast.success("Check your email");
+      router.push("/login");
+    } catch (error) {
+      const { message } = getAuthError(error);
+      toast.error( "Reset Password Error")
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card className="w-96">
-      <form>
+      <form onSubmit={handleSubmit}>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Reset password</CardTitle>
           <CardDescription className="text-xs">
@@ -33,10 +55,16 @@ export function ForgotPasswordForm() {
               id="email"
               type="email"
               placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
               required
             />
           </div>
-          <Button className="w-full" type="submit">
+          <Button className="w-full" type="submit" disabled={isLoading}>
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Send reset link
           </Button>
         </CardContent>

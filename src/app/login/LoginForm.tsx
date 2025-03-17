@@ -1,5 +1,8 @@
 "use client";
-import { OAuthSignIn } from "@/components/auth/OAuthSignIn";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,21 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { auth } from "../../../utils/auth";
+import { toast } from "sonner";
 import { getAuthError } from "../../../utils/auth-errors";
-import { Icons } from "@/components/Icons";
+import { OAuthSignIn } from "@/components/auth/OAuthSignIn";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,23 +31,21 @@ export function LoginForm() {
     try {
       setIsLoading(true);
       await auth.signIn(email, password);
-      router.push('/dashboard');
+      router.push("/projects");
       router.refresh();
     } catch (error) {
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       const { message } = getAuthError(error);
-      
-      toast("Authentication Error", {
-        description: message,
-        duration: 5000,
-      });
+      console.error("Auth error msg: ", message);
+      toast.error("Authentication Error");
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <Card className="w-96">
-      <form  onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Log in</CardTitle>
           <CardDescription className="text-xs">Welcome back</CardDescription>
@@ -89,15 +87,15 @@ export function LoginForm() {
             />
           </div>
 
-          <Button className="w-full" type="submit"disabled={isLoading} >
-          {isLoading && (
+          <Button className="w-full" type="submit" disabled={isLoading}>
+            {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
             Sign In
           </Button>
         </CardContent>
         <CardFooter>
-          <OAuthSignIn />
+          <OAuthSignIn isLoading={isLoading} onLoadingChange={setIsLoading} />
         </CardFooter>
       </form>
     </Card>

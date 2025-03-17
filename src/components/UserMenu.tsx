@@ -50,7 +50,7 @@ export function UserMenu({ user }: UserMenuProps) {
           size="icon"
           className="relative h-9 w-9 rounded-full border bg-background"
         >
-          {user.user_metadata.avatar_url ? (
+          {/* {user.user_metadata.avatar_url ? (
             <Image
               src={user.user_metadata.avatar_url}
               alt={user.email || ""}
@@ -60,7 +60,7 @@ export function UserMenu({ user }: UserMenuProps) {
             />
           ) : (
             <CircleUser className="h-5 w-5" />
-          )}
+          )} */}
           <span className="sr-only">Open user menu</span>
         </Button>
       </DropdownMenuTrigger>
