@@ -55,6 +55,19 @@ const ProjectPage: React.FC = () => {
 
     loadData();
   }, [projectId]);
+  
+  const handleColumnCreate = async (name: string) => {
+    try {
+      const board =  boardService.getBoard(projectId);
+      (await board).columns[name] = {id: name, title: name, taskIds: []};
+      const newColumn = await boardService.updateBoard(projectId, (await board).columns, [])
+    }catch(error) {
+      console.error('Error loading data:', error);
+      toast.error("Error updating board");
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleTaskCreate = async (task: Partial<Task>) => {
     try {

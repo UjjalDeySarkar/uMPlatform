@@ -1,7 +1,7 @@
 'use client';
 
 import { toast } from 'sonner'; 
-import { projects } from '../../../utils/projects';
+import { projects } from '../../../../utils/projects';
 import { useMemo, useState } from 'react';
 import { CloseProjectDialog } from './components/CloseProjectDialog';
 import { ProjectTabs } from './components/ProjectTabs';

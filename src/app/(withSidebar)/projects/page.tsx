@@ -1,5 +1,5 @@
-import { createClient } from "../../../utils/supabase/server";
-import { users } from "../../../utils/users";
+import { createClient } from "../../../../utils/supabase/server";
+import { users } from "../../../../utils/users";
 import { AccountDetails } from "./AccountDetails";
 import { Projects } from "./Projects";
 import { redirect } from "next/navigation";
@@ -19,9 +19,6 @@ export default async function ProjectsPage() {
 
   return (
     <div className="w-[90%] flex flex-col md:flex-row mx-auto p-8 gap-4">
-      <div className="w-full md:w-72">
-        <AccountDetails initialData={userData} />
-      </div>
       <div className="flex-1">
         <Projects initialProjects={[]} />
       </div>

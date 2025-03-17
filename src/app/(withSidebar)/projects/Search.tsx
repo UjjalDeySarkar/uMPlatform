@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import { successBtnStyles } from '../commonStyles';
+import { successBtnStyles } from '../../commonStyles';
 
 interface SearchAndButtonProps {
   placeholderText: string;
