@@ -54,22 +54,28 @@ export const Header = ({ className }: HeaderProps) => {
         </Link>
 
         <div className="flex items-center gap-4">
-          {user ? (
-            <UserMenu user={user} />
-          ) : (
-            <div className="flex items-center gap-3">
-              {isLandingPage && (
-                <>
-                  <Button variant="ghost" asChild>
-                    <Link href="/login">Sign in</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
           <div className="border-l pl-4 dark:border-gray-800 m-4">
             <ThemeToggle />
           </div>
+
+          {isLandingPage && (
+            <>
+              {user ? (
+                <UserMenu user={user} />
+              ) : (
+                !isLandingPage && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/login">Sign In</Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link href="/create-account">Sign Up</Link>
+                    </Button>
+                  </div>
+                )
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

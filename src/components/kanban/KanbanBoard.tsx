@@ -10,23 +10,26 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
-import { Task, User, Column as ColumnType } from '@/types/kanban';
+import { User, Column as ColumnType } from '@/types/kanban';
 import Column from './Column';
 import SearchBar from './SearchBar';
 import FilterMenu from './FilterMenu';
 import TaskDetail from './TaskDetail';
 import TaskForm from './TaskForm';
+import Task from './Task';
+import ColumnAddButton from './ColumnAddButton';
 import { PlusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface KanbanBoardProps {
   projectId: string;
   columns: Record<string, ColumnType>;
   columnOrder: string[];
-  tasks: Task[];
+  tasks: any[]; // Changed from Task[] to any[]
   users: User[];
-  onTaskCreate: (task: Partial<Task>) => void;
-  onTaskUpdate: (task: Partial<Task>) => void;
+  onTaskCreate: (task: Partial<any>) => void;
+  onTaskUpdate: (task: Partial<any>) => void;
   onTaskDelete: (taskId: string) => void;
   onBoardUpdate: (columns: Record<string, ColumnType>, columnOrder: string[]) => void;
 }
@@ -86,7 +89,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   // Task detail handlers
-  const handleTaskClick = (task: Task) => {
+  const handleTaskClick = (task: any) => {
     setActiveTask(task);
     setTaskDetailOpen(true);
   };
@@ -98,13 +101,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setTaskFormOpen(true);
   };
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = (task: any) => {
     setEditingTask(task);
     setTaskDetailOpen(false);
     setTaskFormOpen(true);
   };
 
-  const handleSaveTask = (task: Partial<Task>) => {
+  const handleSaveTask = (task: Partial<any>) => {
     if (editingTask) {
       onTaskUpdate(task);
     } else {
@@ -117,10 +120,85 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }
   };
 
+  // Column handlers
+  const handleAddColumn = (columnName: string, columnColor: string) => {
+    // Generate a new column ID (using the column name as the ID, converted to kebab-case)
+    const columnId = columnName.toLowerCase().replace(/\s+/g, '-');
+    
+    // Check if column ID already exists
+    if (columns[columnId]) {
+      // In a real app, you'd want to show an error message
+      console.error(`Column with ID '${columnId}' already exists`);
+      return;
+    }
+    
+    // Create new column
+    const newColumn: ColumnType = {
+      id: columnId,
+      title: columnName,
+      taskIds: [],
+      color: columnColor
+    };
+    
+    // Update the columns object and column order
+    const updatedColumns = {
+      ...columns,
+      [columnId]: newColumn,
+    };
+    
+    const updatedColumnOrder = [...columnOrder, columnId];
+    
+    // Update the board
+    onBoardUpdate(updatedColumns, updatedColumnOrder);
+    toast.success('successfully added new status')
+  };
+  
+  // Handle column deletion
+  const handleDeleteColumn = (columnId: string) => {
+    // Get tasks in this column
+    const tasksInColumn = columns[columnId].taskIds;
+    
+    // Create updated columns without the deleted column
+    const { [columnId]: deletedColumn, ...updatedColumns } = columns;
+    
+    // Remove column from column order
+    const updatedColumnOrder = columnOrder.filter(id => id !== columnId);
+    
+    // If there are tasks in the column and at least one other column exists
+    if (tasksInColumn.length > 0 && updatedColumnOrder.length > 0) {
+      // Move tasks to the first available column
+      const targetColumnId = updatedColumnOrder[0];
+      updatedColumns[targetColumnId] = {
+        ...updatedColumns[targetColumnId],
+        taskIds: [...updatedColumns[targetColumnId].taskIds, ...tasksInColumn]
+      };
+      
+      // Update tasks status
+      tasksInColumn.forEach(taskId => {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          onTaskUpdate({
+            id: taskId,
+            status: targetColumnId
+          });
+        }
+      });
+    }
+    
+    // Update the board
+    onBoardUpdate(updatedColumns, updatedColumnOrder);
+    toast.warning('status deleted')
+  };
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    setActiveId(active.id as string);
+    const activeTask = tasks.find(task => task.id === active.id);
+    
+    if (activeTask) {
+      setActiveId(active.id as string);
+      setActiveTask(activeTask);
+    }
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -130,93 +208,106 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    // If the task is dropped in the same column, do nothing
+    // Find the active task
     const activeTask = tasks.find(task => task.id === activeId);
     if (!activeTask) return;
 
-    // Find the column the task is currently in
-    const activeColumn = Object.values(columns).find(col => 
-      col.taskIds.includes(activeId)
+    // Find the source column
+    const sourceColumn = Object.values(columns).find(
+      col => col.taskIds.includes(activeId)
     );
-    if (!activeColumn) return;
+    if (!sourceColumn) return;
 
-    // Check if over a column
-    const isOverColumn = Object.keys(columns).includes(overId);
-    if (isOverColumn) {
-      // If over a different column, move the task to the new column
-      if (activeColumn.id !== overId) {
-        const updatedColumns = { ...columns };
-        
-        // Remove from source column
-        updatedColumns[activeColumn.id] = {
-          ...activeColumn,
-          taskIds: activeColumn.taskIds.filter(id => id !== activeId),
-        };
-        
-        // Add to destination column
-        updatedColumns[overId] = {
-          ...columns[overId],
-          taskIds: [...columns[overId].taskIds, activeId],
-        };
-        
-        onBoardUpdate(updatedColumns, columnOrder);
-        
-        // Update task status
+    // If over a column directly
+    if (Object.keys(columns).includes(overId)) {
+      const destinationColumn = columns[overId];
+      
+      // Skip if same column and task is already at the end
+      if (sourceColumn.id === destinationColumn.id && 
+          sourceColumn.taskIds.indexOf(activeId) === sourceColumn.taskIds.length - 1) {
+        return;
+      }
+      
+      // Update columns
+      const updatedColumns = { ...columns };
+      
+      // Remove from source
+      updatedColumns[sourceColumn.id] = {
+        ...sourceColumn,
+        taskIds: sourceColumn.taskIds.filter(id => id !== activeId)
+      };
+      
+      // Add to destination
+      updatedColumns[overId] = {
+        ...destinationColumn,
+        taskIds: [...destinationColumn.taskIds, activeId]
+      };
+      
+      // Update board
+      onBoardUpdate(updatedColumns, columnOrder);
+      
+      // Update task status
+      if (sourceColumn.id !== destinationColumn.id) {
         onTaskUpdate({
           id: activeId,
-          status: overId,
+          status: destinationColumn.id
         });
       }
+      
+      return;
+    }
+    
+    // Handle task over task scenario
+    const overTask = tasks.find(task => task.id === overId);
+    if (!overTask) return;
+    
+    const destinationColumnId = overTask.status;
+    const destinationColumn = columns[destinationColumnId];
+    
+    // Skip if same column and adjacent tasks
+    const sourceIndex = sourceColumn.taskIds.indexOf(activeId);
+    const destinationIndex = destinationColumn.taskIds.indexOf(overId);
+    
+    if (
+      sourceColumn.id === destinationColumn.id &&
+      (sourceIndex === destinationIndex || sourceIndex === destinationIndex - 1)
+    ) {
+      return;
+    }
+    
+    const updatedColumns = { ...columns };
+    
+    // Remove from source column
+    updatedColumns[sourceColumn.id] = {
+      ...sourceColumn,
+      taskIds: sourceColumn.taskIds.filter(id => id !== activeId)
+    };
+    
+    // Create new taskIds array for destination
+    const newTaskIds = [...destinationColumn.taskIds];
+    
+    // If same column, need to handle the reordering differently
+    if (sourceColumn.id === destinationColumn.id && sourceIndex < destinationIndex) {
+      newTaskIds.splice(destinationIndex, 0, activeId);
     } else {
-      // Task over task - reorder in the same column
-      const overTask = tasks.find(task => task.id === overId);
-      if (!overTask) return;
-      
-      const overColumn = Object.values(columns).find(col => 
-        col.taskIds.includes(overId)
-      );
-      if (!overColumn) return;
-      
-      // If tasks are in the same column, reorder
-      if (activeColumn.id === overColumn.id) {
-        const oldIndex = activeColumn.taskIds.indexOf(activeId);
-        const newIndex = overColumn.taskIds.indexOf(overId);
-        
-        const updatedColumns = { ...columns };
-        updatedColumns[activeColumn.id] = {
-          ...activeColumn,
-          taskIds: arrayMove(activeColumn.taskIds, oldIndex, newIndex),
-        };
-        
-        onBoardUpdate(updatedColumns, columnOrder);
-      } else {
-        // Moving to different column at specific position
-        const updatedColumns = { ...columns };
-        
-        // Remove from source column
-        updatedColumns[activeColumn.id] = {
-          ...activeColumn,
-          taskIds: activeColumn.taskIds.filter(id => id !== activeId),
-        };
-        
-        // Add to destination column at specific position
-        const overIndex = overColumn.taskIds.indexOf(overId);
-        const newTaskIds = [...overColumn.taskIds];
-        newTaskIds.splice(overIndex, 0, activeId);
-        
-        updatedColumns[overColumn.id] = {
-          ...overColumn,
-          taskIds: newTaskIds,
-        };
-        
-        onBoardUpdate(updatedColumns, columnOrder);
-        
-        // Update task status
-        onTaskUpdate({
-          id: activeId,
-          status: overColumn.id,
-        });
-      }
+      newTaskIds.splice(destinationIndex, 0, activeId);
+    }
+    
+    // Update destination column
+    updatedColumns[destinationColumn.id] = {
+      ...destinationColumn,
+      taskIds: newTaskIds
+    };
+    
+    // Update the board
+    onBoardUpdate(updatedColumns, columnOrder);
+    
+    // Update task status if moved to a different column
+    if (sourceColumn.id !== destinationColumn.id) {
+      onTaskUpdate({
+        id: activeId,
+        status: destinationColumn.id
+      });
     }
   };
 
@@ -263,33 +354,41 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="h-full overflow-x-auto overflow-y-hidden flex gap-4 pb-4">
-            <SortableContext items={columnOrder}>
-              {columnOrder.map(columnId => {
-                const column = columns[columnId];
-                const columnTasks = filteredTasks.filter(
-                  task => column.taskIds.includes(task.id)
-                );
-                
-                return (
-                  <Column
-                    key={column.id}
-                    column={column}
-                    tasks={columnTasks}
-                    users={users}
-                    onTaskClick={handleTaskClick}
-                    onAddTask={handleNewTask}
-                  />
-                );
-              })}
-            </SortableContext>
+          <div className="h-full overflow-x-auto overflow-y-hidden pb-4">
+            <div className="flex h-full gap-4 pr-4">
+              <SortableContext items={columnOrder}>
+                {columnOrder.map(columnId => {
+                  const column = columns[columnId];
+                  const columnTasks = filteredTasks.filter(
+                    task => column.taskIds.includes(task.id)
+                  );
+                  
+                  return (
+                    <Column
+                      key={column.id}
+                      column={column}
+                      tasks={columnTasks}
+                      users={users}
+                      onTaskClick={handleTaskClick}
+                      onAddTask={handleNewTask}
+                      onDeleteColumn={handleDeleteColumn}
+                    />
+                  );
+                })}
+              </SortableContext>
+              
+              {/* Add Column Button */}
+              <ColumnAddButton onColumnAdd={handleAddColumn} />
+            </div>
           </div>
           
           <DragOverlay>
-            {activeId && (
-              <div className="task-card opacity-80">
-                {tasks.find(task => task.id === activeId)?.title}
-              </div>
+            {activeId && activeTask && (
+              <Task
+                task={activeTask}
+                assignedUser={users.find(u => u.id === activeTask.assignedUserId)}
+                onClick={() => {}}
+              />
             )}
           </DragOverlay>
         </DndContext>

@@ -1,4 +1,9 @@
 export type Priority = 'low' | 'medium' | 'high';
+type RGB = `rgb(${number}, ${number}, ${number})`;
+type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
+type HEX = `#${string}`;
+
+type Color = RGB | RGBA | HEX
 
 export interface User {
   id: string;
@@ -29,6 +34,7 @@ export interface Task {
 export interface Column {
   id: string;
   title: string;
+  color?: Color;
   taskIds: string[];
 }
 

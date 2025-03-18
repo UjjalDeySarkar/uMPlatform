@@ -1,5 +1,5 @@
 "use client"
-import { logout } from "@/app/auth/logout"
+import { logout } from "@/app/(auth)/auth/logout"
 import {
   BadgeCheck,
   Bell,

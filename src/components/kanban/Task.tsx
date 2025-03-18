@@ -5,12 +5,11 @@ import { CSS } from '@dnd-kit/utilities';
 import { format } from 'date-fns';
 import UserAvatar from './UserAvatar';
 import PriorityBadge from './PriorityBadge';
-import { Task as TaskType, User } from '@/types/kanban';
 
 interface TaskProps {
-  task: TaskType;
-  assignedUser?: User;
-  onClick: (task: TaskType) => void;
+  task: any;
+  assignedUser?: any;
+  onClick: (task: any) => void;
 }
 
 const Task: React.FC<TaskProps> = ({ task, assignedUser, onClick }) => {
@@ -36,7 +35,7 @@ const Task: React.FC<TaskProps> = ({ task, assignedUser, onClick }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="task-card animate-fade-in"
+      className="p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer animate-fade-in"
       onClick={() => onClick(task)}
     >
       <div className="flex justify-between items-start mb-2">

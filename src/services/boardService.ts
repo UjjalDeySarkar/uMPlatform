@@ -307,6 +307,71 @@ export const boardService = {
     });
   },
 
+  // Add this function to the boardService object in your code
+
+  deleteColumn: async (projectId: string, columnId: string): Promise<Board> => {
+    // Simulate API call
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const board = boards[projectId];
+        
+        if (!board) {
+          reject(new Error('Board not found'));
+          return;
+        }
+        
+        // Check if the column exists
+        if (!board.columns[columnId]) {
+          reject(new Error('Column not found'));
+          return;
+        }
+        
+        // Get the tasks in the column
+        const tasksInColumn = board.columns[columnId].taskIds;
+        
+        // Create updated columns without the deleted column
+        const { [columnId]: deletedColumn, ...updatedColumns } = board.columns;
+        
+        // Create updated column order
+        const updatedColumnOrder = board.columnOrder.filter(id => id !== columnId);
+        
+        // If there are tasks in the column and at least one other column exists
+        if (tasksInColumn.length > 0 && updatedColumnOrder.length > 0) {
+          // Move tasks to the first available column
+          const targetColumnId = updatedColumnOrder[0];
+          
+          // Update target column's taskIds
+          updatedColumns[targetColumnId] = {
+            ...updatedColumns[targetColumnId],
+            taskIds: [...updatedColumns[targetColumnId].taskIds, ...tasksInColumn]
+          };
+          
+          // Update tasks status
+          tasksInColumn.forEach(taskId => {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+              tasks[taskIndex] = {
+                ...tasks[taskIndex],
+                status: targetColumnId
+              };
+            }
+          });
+        }
+        
+        // Create updated board
+        const updatedBoard: Board = {
+          columns: updatedColumns,
+          columnOrder: updatedColumnOrder
+        };
+        
+        // Update board in storage
+        boards[projectId] = updatedBoard;
+        
+        resolve(updatedBoard);
+      }, 300);
+    });
+  },
+
   updateBoard: async (projectId: string, columns: Record<string, Column>, columnOrder: string[]): Promise<Board> => {
     // Simulate API call
     return new Promise((resolve) => {

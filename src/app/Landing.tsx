@@ -46,9 +46,9 @@ export const LandingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
+    <div className="h-screen w-full overflow-y-auto bg-gradient-to-b from-background to-background/95">
       {/* Hero Section */}
-      <div className="container pt-32 pb-20">
+      <div className="w-full px-4 md:px-8 pt-32 pb-20">
         {/* Content */}
         <div className="max-w-[800px] mx-auto text-center space-y-8 mb-20">
           <div className="space-y-6">
@@ -122,7 +122,7 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Background Gradient Effect */}
-      <div className="fixed inset-0 -z-10 h-full w-full bg-background">
+      <div className="fixed inset-0 -z-10 w-full h-full bg-background">
         <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-primary/5 to-background"></div>
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="h-[40rem] w-[40rem] rounded-full bg-primary/5 blur-3xl"></div>
