@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from "sonner";
 import { cn } from '@/lib/utils';
-import { users, type IUser } from '../../../../utils/users';
+import { users, type IUser } from '@/utils/users';
 import { ExternalLink, Link as LinkIcon, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
 import { secondaryBtnStyles } from '../../commonStyles';

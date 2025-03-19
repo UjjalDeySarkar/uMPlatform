@@ -21,7 +21,7 @@ import { Trash, Loader2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { primaryBtnStyles } from "../commonStyles";
-import { users, type IUser } from "../../../utils/users";
+import { users, type IUser } from "@/utils/users";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "../utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 const features = [
   "Intuitive Kanban boards",

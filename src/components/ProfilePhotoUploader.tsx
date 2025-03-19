@@ -5,7 +5,7 @@ import { Loader2, Plus, Upload } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { primaryBtnStyles } from '../app/commonStyles';
-import { createClient } from '../utils/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 import { toast } from "sonner";
 
 interface ProfilePhotoUploaderProps {

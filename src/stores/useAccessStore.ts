@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createClient } from '../utils/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 import { ProjectAction } from '@/constants';
 
 interface AccessState {

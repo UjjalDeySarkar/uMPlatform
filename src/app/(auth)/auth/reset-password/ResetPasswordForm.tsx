@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { auth, type AuthError } from "../../../../utils/auth";
+import { auth, type AuthError } from "@/utils/auth";
 import { toast } from "sonner";
 
 export function ResetPasswordForm() {
