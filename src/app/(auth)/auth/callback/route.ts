@@ -37,6 +37,7 @@ export async function GET(request: Request) {
         console.error('Auth error:', error);
         throw error;
       }
+    } finally {}
 
     // Capture user details after successful OAuth
     if (data.user) {
@@ -56,5 +57,7 @@ export async function GET(request: Request) {
     const errorUrl = new URL('/auth/auth-error', request.url);
     errorUrl.searchParams.set('error', 'Failed to sign in');
     return NextResponse.redirect(errorUrl);
+  }finally{
+    return
   }
 }
