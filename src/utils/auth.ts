@@ -1,6 +1,6 @@
 import { useAccessStore } from '@/stores/useAccessStore';
 import { createClient } from './supabase/client';
-import { users } from './users';
+import { users } from '@/utils/users';
 
 const supabase = createClient();
 

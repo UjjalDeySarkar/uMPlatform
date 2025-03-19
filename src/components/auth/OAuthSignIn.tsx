@@ -3,9 +3,9 @@
 import { Suspense, useState } from "react";
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
-import { auth } from "../../../utils/auth";
+import { auth } from "../../utils/auth";
 import { toast } from "sonner";
-import { getAuthError } from "../../../utils/auth-errors";
+import { getAuthError } from "../../utils/auth-errors";
 import { useSearchParams } from "next/navigation";
 
 interface Props {

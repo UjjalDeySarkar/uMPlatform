@@ -1,5 +1,5 @@
-import { createClient } from "../../../../utils/supabase/server";
-import { users } from "../../../../utils/users";
+import { createClient } from "@/utils/supabase/server";
+import { users } from "@/utils/users";
 import { AccountDetails } from "./AccountDetails";
 import { Projects } from "./Projects";
 import { redirect } from "next/navigation";

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
-import { createClient } from "../../utils/supabase/client";
+import { createClient } from "../utils/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Button } from "./ui/button";

@@ -1,5 +1,5 @@
 import React from "react";
-import { createClient } from "../../../utils/supabase/server";
+import { createClient } from "../../utils/supabase/server";
 import { redirect } from "next/navigation";
 import { users } from "../../../utils/users";
 import { ProfileForm } from "./ProfileForm";
