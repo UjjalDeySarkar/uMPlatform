@@ -104,7 +104,7 @@ export const LandingPage: React.FC = () => {
                 <Image
                   src={
                     resolvedTheme === "dark"
-                      ? "/KanbanBoard-dark.png"
+                      ? "/l-dark.png"
                       : "/Kanban.png"
                   }
                   alt="App preview"

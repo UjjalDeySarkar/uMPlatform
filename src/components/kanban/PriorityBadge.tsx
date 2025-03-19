@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, AlertTriangle, Flag } from 'lucide-react';
+import { Flag, AlertTriangle, AlertCircle, Clock, Flame } from 'lucide-react';
 import { Priority } from '@/types/kanban';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -17,18 +17,18 @@ const PriorityBadge: React.FC<PriorityBadgeProps> = ({
 }) => {
   const config = {
     low: {
-      icon: Flag,
-      color: 'text-priority-low bg-priority-low/10',
+      icon: Clock,
+      color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
       label: 'Low',
     },
     medium: {
       icon: AlertTriangle,
-      color: 'text-priority-medium bg-priority-medium/10',
+      color: 'text-amber-600 bg-amber-50 border-amber-200',
       label: 'Medium',
     },
     high: {
-      icon: AlertCircle,
-      color: 'text-priority-high bg-priority-high/10',
+      icon: Flame,
+      color: 'text-red-600 bg-red-50 border-red-200',
       label: 'High',
     },
   };
@@ -36,10 +36,10 @@ const PriorityBadge: React.FC<PriorityBadgeProps> = ({
   const { icon: Icon, color, label } = config[priority];
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant="outline"
       className={cn(
-        'font-normal border-0', 
+        'font-medium border',
         color,
         size === 'sm' ? 'text-xs px-1.5 py-0' : 'text-xs'
       )}
