@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { CreateProjectModal } from "./CreateProjectModal";
 
 export function NewProjectForm() {
   const [name, setName] = useState("");
@@ -41,17 +42,18 @@ export function NewProjectForm() {
         />
       </div>
       <div className="flex">
-        {/* <CreateProjectModal
-          projectDetails={{
-            name,
-            description,
-            readme,
-          }}
-        /> */}
         <button className="px-4 py-2 font-semibold text-white bg-green-500 hover:bg-green-700">
-          Continue
+          <CreateProjectModal
+            projectDetails={{
+              name,
+              description,
+              readme,
+            }}
+          />
         </button>
       </div>
+
+      {/* <CustomFieldOptions field="=status" options={[]} /> */}
     </div>
   );
 }
