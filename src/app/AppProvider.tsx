@@ -12,10 +12,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div className="h-10">
-          <Header />
-        </div>
-        {children}
+        <Header />
+        <main className="pt-10">
+          {children}
+        </main>
       </ThemeProvider>
       <Toaster />
       <ReactQueryDevtools initialIsOpen={false} />

@@ -10,11 +10,10 @@ import { User } from "@supabase/supabase-js";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
 
-
 interface HeaderProps {
   className?: string;
 }
-// className="h-f flex justify-center items-center"
+
 const supabase = createClient();
 
 export const Header = ({ className }: HeaderProps) => {
@@ -41,41 +40,36 @@ export const Header = ({ className }: HeaderProps) => {
   return (
     <header
       className={cn(
-        "fixed items-center top-0 w-full z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "fixed top-0 w-full z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         className
       )}
     >
-      <div className="container flex h-10 items-center justify-between">
+      <div className="w-full flex h-10 items-center justify-between px-4 md:px-6">
         <Link
           href={"/"}
-          className="flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors m-4"
+          className="flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors"
         >
           UnManage AI
         </Link>
 
         <div className="flex items-center gap-4">
-          <div className="border-l pl-4 dark:border-gray-800 m-4">
+          <div className="border-l pl-4 dark:border-gray-800">
             <ThemeToggle />
           </div>
 
-          {isLandingPage && (
+          {isLandingPage ? (
             <>
               {user ? (
                 <UserMenu user={user} />
               ) : (
-                !isLandingPage && (
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href="/login">Sign In</Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link href="/create-account">Sign Up</Link>
-                    </Button>
-                  </div>
-                )
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                </div>
               )}
             </>
-          )}
+          ): (<></>)}
         </div>
       </div>
     </header>

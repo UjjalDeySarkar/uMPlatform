@@ -229,7 +229,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
                     mode="single"
                     selected={dueDate}
                     onSelect={setDueDate}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

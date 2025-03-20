@@ -106,6 +106,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setTaskDetailOpen(false);
     setTaskFormOpen(true);
   };
+  
+  const handleDeleteTask = (task: any) => {
+    onTaskDelete(task);
+    setTaskDetailOpen(false);
+  }
 
   const handleSaveTask = (task: Partial<any>) => {
     if (editingTask) {
@@ -400,7 +405,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         users={users}
         onOpenChange={setTaskDetailOpen}
         onEdit={handleEditTask}
-        onDelete={onTaskDelete}
+        onDelete={handleDeleteTask}
       />
 
       <TaskForm
