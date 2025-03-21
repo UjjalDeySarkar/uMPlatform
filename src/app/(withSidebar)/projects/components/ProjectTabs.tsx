@@ -32,6 +32,11 @@ export const ProjectTabs = () => {
     fetchProjects();
   }, []);
 
+  // Function to add new project without reloading
+  const addProjectToList = (newProject: IProject) => {
+    setProjects((prevProjects) => [newProject, ...prevProjects]);
+  };
+
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -73,7 +78,7 @@ export const ProjectTabs = () => {
       </TabsList>
 
       <TabsContent value="active-projects">
-        <SearchAndButton placeholderText="Search active projects" onSearch={setSearchTerm} />
+        <SearchAndButton placeholderText="Search active projects" onSearch={setSearchTerm} onProjectCreated={addProjectToList}/>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {activeProjects.map((project) => (
             <Card key={project.id} className="shadow-sm border border-gray-200">
@@ -96,7 +101,7 @@ export const ProjectTabs = () => {
       </TabsContent>
 
       <TabsContent value="closed-projects">
-        <SearchAndButton placeholderText="Search closed projects" onSearch={setSearchTerm} />
+        <SearchAndButton placeholderText="Search closed projects" onSearch={setSearchTerm} onProjectCreated={addProjectToList}/>
         {/* <ProjectList tab="closed" projects={closedProjects} sortOrder={sortOrder} /> */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {closedProjects.map((project) => (
@@ -120,7 +125,7 @@ export const ProjectTabs = () => {
       </TabsContent>
 
       <TabsContent value="all-projects">
-        <SearchAndButton placeholderText="Search all projects" onSearch={setSearchTerm} />
+        <SearchAndButton placeholderText="Search all projects" onSearch={setSearchTerm} onProjectCreated={addProjectToList}/>
         {/* <ProjectList tab="all" projects={projects} sortOrder={sortOrder} /> */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {allProjects.map((project) => (

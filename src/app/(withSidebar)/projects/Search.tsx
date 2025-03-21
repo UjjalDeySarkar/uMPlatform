@@ -23,9 +23,10 @@ const { data: user } = await supabase.auth.getUser();
 interface SearchAndButtonProps {
   placeholderText: string;
   onSearch?: (term: string) => void;
+  onProjectCreated?: (newProject: IProject) => void;
 }
 
-const SearchAndButton = ({ placeholderText, onSearch }: SearchAndButtonProps) => {
+const SearchAndButton = ({ placeholderText, onSearch, onProjectCreated }: SearchAndButtonProps) => {
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
@@ -69,7 +70,8 @@ const SearchAndButton = ({ placeholderText, onSearch }: SearchAndButtonProps) =>
         closed: false,
         workspace_id: workspaceId, // Replace with actual workspace ID
       }
-    ]);
+    ]).select('*')
+    .single(); // Fetch the inserted row;
 
     setLoading(false);
 
@@ -79,10 +81,11 @@ const SearchAndButton = ({ placeholderText, onSearch }: SearchAndButtonProps) =>
       toast.error("Failed to create project.")
     } else {
       console.log("Project created:", data);
+      onProjectCreated?.(data); // Update state in ProjectTabs
       setOpen(false);
       setProjectName('');
       setProjectDescription('');
-      toast.success("Project created.")
+      toast.success("Project created successfully.")
     }
   };
 
