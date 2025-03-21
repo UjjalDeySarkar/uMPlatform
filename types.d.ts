@@ -33,11 +33,10 @@ interface IProject {
   id: string;
   name: string;
   description: string;
-  readme: string;
+  created_at: string;
   created_by: string;
-  created_at: Date;
-  updated_at: Date;
   closed: boolean;
+  workspace_id: string;
 }
 
 interface IProjectMember {
@@ -65,7 +64,7 @@ interface IStatus extends IField {
   limit: number;
 }
 
-interface ILabel extends IField {}
+interface ILabel extends IField { }
 interface IPriority extends IField {
   order: number;
 }
