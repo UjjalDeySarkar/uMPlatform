@@ -1,5 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Task, Column, Board, Project, User, Priority } from '@/types/kanban';
+import { createClient } from '@/utils/supabase/client';
+
+const supabase = await createClient();
 
 // Mock data - replace with actual API calls to Supabase in production
 const MOCK_USERS: User[] = [
@@ -20,20 +23,26 @@ const MOCK_USERS: User[] = [
   }
 ];
 
-const MOCK_PROJECTS: Project[] = [
-  {
-    id: '1',
-    name: 'Website Redesign',
-    description: 'Redesign the company website',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Mobile App',
-    description: 'Develop a new mobile app',
-    createdAt: new Date().toISOString(),
+let projectSet: Project[] = [];
+
+// Fetch projects from Supabase and update projectSet
+const fetchProjectsFromSupabase = async () => {
+  const { data, error } = await supabase.from("projects").select("*");
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
   }
-];
+
+  projectSet = data.map((project) => ({
+    id: project.id,
+    name: project.name,
+    description: project.description || "",
+    createdAt: project.created_at || new Date().toISOString(),
+  }));
+
+  return projectSet;
+};
 
 const MOCK_TASKS: Task[] = [
   {
@@ -43,7 +52,7 @@ const MOCK_TASKS: Task[] = [
     status: 'todo',
     priority: 'high',
     assignedUserId: '1',
-    projectId: '1',
+    projectId: '492c3906-a20c-46ed-83e7-22e9bbcfbd63',
     createdAt: new Date().toISOString(),
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -54,7 +63,7 @@ const MOCK_TASKS: Task[] = [
     status: 'inProgress',
     priority: 'medium',
     assignedUserId: '2',
-    projectId: '1',
+    projectId: '492c3906-a20c-46ed-83e7-22e9bbcfbd63',
     createdAt: new Date().toISOString(),
   },
   {
@@ -64,7 +73,7 @@ const MOCK_TASKS: Task[] = [
     status: 'review',
     priority: 'low',
     assignedUserId: '3',
-    projectId: '1',
+    projectId: '492c3906-a20c-46ed-83e7-22e9bbcfbd63',
     createdAt: new Date().toISOString(),
   },
   {
@@ -117,7 +126,7 @@ const DEFAULT_BOARD: Board = {
 
 // In memory storage - replace with Supabase in production
 let tasks = [...MOCK_TASKS];
-let projects = [...MOCK_PROJECTS];
+let projects = [...projectSet];
 let users = [...MOCK_USERS];
 let boards: Record<string, Board> = {
   '1': DEFAULT_BOARD,
@@ -148,10 +157,7 @@ let boards: Record<string, Board> = {
 // Board service
 export const boardService = {
   getProjects: async (): Promise<Project[]> => {
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(projects), 300);
-    });
+    return fetchProjectsFromSupabase(); 
   },
 
   getUsers: async (): Promise<User[]> => {
@@ -165,6 +171,7 @@ export const boardService = {
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
+        debugger
         const projectTasks = tasks.filter(task => task.projectId === projectId);
         resolve(projectTasks);
       }, 300);
@@ -227,9 +234,9 @@ export const boardService = {
           createdAt: new Date().toISOString(),
           dueDate: task.dueDate,
         };
-        
+
         tasks.push(newTask);
-        
+
         // Update board
         const board = boards[newTask.projectId];
         if (board) {
@@ -238,7 +245,7 @@ export const boardService = {
             column.taskIds.push(newTask.id);
           }
         }
-        
+
         resolve(newTask);
       }, 300);
     });
@@ -253,7 +260,7 @@ export const boardService = {
           const oldTask = tasks[index];
           const updatedTask = { ...oldTask, ...task };
           tasks[index] = updatedTask;
-          
+
           // If status changed, update board
           if (task.status && oldTask.status !== task.status) {
             const board = boards[oldTask.projectId];
@@ -263,7 +270,7 @@ export const boardService = {
               if (oldColumn) {
                 oldColumn.taskIds = oldColumn.taskIds.filter(id => id !== task.id);
               }
-              
+
               // Add to new column
               const newColumn = board.columns[task.status];
               if (newColumn) {
@@ -271,7 +278,7 @@ export const boardService = {
               }
             }
           }
-          
+
           resolve(updatedTask);
         } else {
           reject(new Error('Task not found'));
@@ -287,7 +294,7 @@ export const boardService = {
         const index = tasks.findIndex(t => t.id === taskId);
         if (index !== -1) {
           const task = tasks[index];
-          
+
           // Remove task from board
           const board = boards[task.projectId];
           if (board) {
@@ -296,7 +303,7 @@ export const boardService = {
               column.taskIds = column.taskIds.filter(id => id !== taskId);
             }
           }
-          
+
           // Remove task from list
           tasks.splice(index, 1);
           resolve();

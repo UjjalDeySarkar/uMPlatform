@@ -13,7 +13,6 @@ const ProjectPage: React.FC = () => {
   const router = useRouter();
   const params = useParams(); 
   const projectId = params?.projectId as string; 
-
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -40,7 +39,9 @@ const ProjectPage: React.FC = () => {
           router.push('/');
           return;
         }
-
+        
+        console.log("#####tasksData")
+        console.log(tasksData)
         setProject(projectData);
         setTasks(tasksData);
         setUsers(usersData);

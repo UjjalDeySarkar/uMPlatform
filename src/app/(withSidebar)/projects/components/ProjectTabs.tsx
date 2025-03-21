@@ -1,7 +1,7 @@
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PanelsTopLeft, SquareKanban, View } from 'lucide-react';
+import { Link, PanelsTopLeft, SquareKanban, View } from 'lucide-react';
 import SearchAndButton from '../Search';
 import { ProjectList } from '../ProjectList';
 import { createClient } from '@/utils/supabase/client';
@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const supabase = await createClient();
 
@@ -17,7 +18,7 @@ export const ProjectTabs = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-
+  const router = useRouter(); // Initialize router
   useEffect(() => {
     const fetchProjects = async () => {
       const { data, error } = await supabase.from('projects').select('*');
@@ -91,8 +92,10 @@ export const ProjectTabs = () => {
                 <p className="text-sm text-gray-400">Created on {formatDate(project.created_at)}</p>
               </CardContent>
                 <CardFooter>
-                  <Button className="w-full">
-                    <View />View Board
+                  <Button className="w-full" onClick={() => router.push(`/projects/${project.id}`)}>
+                    {/* <Link href={`/projects/${project.id}`}> */}
+                      <View />View Board                  
+                    {/* </Link> */}
                   </Button>
                 </CardFooter>
             </Card>
