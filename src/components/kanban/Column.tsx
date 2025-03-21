@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import Task from './Task';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import ColumnMenu from './ColumnMenu'; // Import the ColumnMenu component
+import ColumnMenu from './ColumnMenu';
 
 interface ColumnProps {
   column: ColumnType;
@@ -13,7 +13,7 @@ interface ColumnProps {
   users: User[];
   onTaskClick: (task: any) => void;
   onAddTask: (status: string) => void;
-  onDeleteColumn: (columnId: string) => void; // Make sure this is required
+  onDeleteColumn: (columnId: string) => void;
 }
 
 const Column: React.FC<ColumnProps> = ({
@@ -38,34 +38,34 @@ const Column: React.FC<ColumnProps> = ({
       column,
     },
   });
-
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
+  
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="h-full flex-shrink-0 flex flex-col bg-white rounded-md shadow-sm min-w-[280px] w-[280px] border border-gray-200"
+      className="h-full flex-shrink-0 flex flex-col bg-white dark:bg-gray-800 rounded-md shadow-sm min-w-[280px] w-[280px] border border-gray-200 dark:border-gray-700"
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-full" 
-            style={{ 
-              backgroundColor: column.color || 
-              (column.title === "Not Started" ? "#ef4444" : 
-               column.title === "In Progress" ? "#3b82f6" : 
-               column.title === "Done" ? "#10b981" : "#9ca3af") 
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{
+              backgroundColor: column.color ||
+              (column.title === "Not Started" ? "#ef4444" :
+               column.title === "In Progress" ? "#3b82f6" :
+               column.title === "Done" ? "#10b981" : "#9ca3af")
             }}
           />
-          <h3 className="font-medium text-sm">{column.title}</h3>
-          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+          <h3 className="font-medium text-sm dark:text-gray-100">{column.title}</h3>
+          <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full">
             {tasks.length}
           </span>
         </div>
@@ -73,21 +73,20 @@ const Column: React.FC<ColumnProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-gray-100"
+            className="h-7 w-7 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
             onClick={() => onAddTask(column.id)}
           >
             <PlusIcon className="h-4 w-4" />
           </Button>
-          {/* Replace delete button with ColumnMenu */}
-          <ColumnMenu 
-            columnId={column.id} 
-            onDeleteColumn={onDeleteColumn} 
+          {/* Column Menu */}
+          <ColumnMenu
+            columnId={column.id}
+            onDeleteColumn={onDeleteColumn}
           />
         </div>
       </div>
-
       {/* Column Content - Scrollable Task List */}
-      <div 
+      <div
         className="flex-1 overflow-y-auto p-2 space-y-2"
         data-column-id={column.id}
       >
@@ -105,7 +104,7 @@ const Column: React.FC<ColumnProps> = ({
           })
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-gray-400">No tasks</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">No tasks</p>
           </div>
         )}
       </div>
