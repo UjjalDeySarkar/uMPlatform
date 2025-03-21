@@ -35,11 +35,11 @@ const Task: React.FC<TaskProps> = ({ task, assignedUser, onClick }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-3 bg-white rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer animate-fade-in"
+      className="p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow cursor-pointer animate-fade-in"
       onClick={() => onClick(task)}
     >
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-medium text-sm line-clamp-2">{task.title}</h3>
+        <h3 className="font-medium text-sm line-clamp-2 dark:text-gray-100">{task.title}</h3>
         <PriorityBadge priority={task.priority} showLabel={false} size="sm" />
       </div>
       

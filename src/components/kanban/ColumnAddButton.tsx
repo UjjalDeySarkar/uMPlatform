@@ -47,10 +47,10 @@ const ColumnAddButton: React.FC<ColumnAddButtonProps> = ({ onColumnAdd }) => {
   return (
     <>
       <div 
-        className="h-full flex-shrink-0 flex flex-col items-center justify-center min-w-[280px] w-[280px] border border-dashed border-gray-300 rounded-md bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
+        className="h-full flex-shrink-0 flex flex-col items-center justify-center min-w-[280px] w-[280px] border border-dashed border-gray-300 dark:border-gray-600 rounded-md bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
         onClick={handleOpen}
       >
-        <div className="flex flex-col items-center gap-2 py-6 text-gray-500">
+        <div className="flex flex-col items-center gap-2 py-6 text-gray-500 dark:text-gray-400">
           <PlusIcon className="h-5 w-5" />
           <span>Add Column</span>
         </div>
@@ -73,7 +73,7 @@ const ColumnAddButton: React.FC<ColumnAddButtonProps> = ({ onColumnAdd }) => {
                   placeholder="Enter column name..."
                   autoFocus
                 />
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
               </div>
               
               <ColorPicker 
