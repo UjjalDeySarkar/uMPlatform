@@ -36,25 +36,44 @@ export const boardService = {
     }));
   },
 
-  // Helper to get all statuses
-  getStatuses: async () => {
+  // Helper to get statuses for a specific project
+  getStatuses: async (projectId) => {
     try {
-      const { data, error } = await supabase.from("status").select("*");
+      // Only get statuses that are associated with this project
+      const { data: projectStatuses, error: joinError } = await supabase
+        .from("project_status")
+        .select(`
+          status_id,
+          status (
+            id,
+            name,
+            color
+          )
+        `)
+        .eq("project_id", projectId);
       
-      if (error) {
-        console.error("Error fetching statuses:", error);
+      if (joinError) {
+        console.error("Error fetching project statuses:", joinError);
         return [];
       }
       
-      return data || [];
+      // If project has no assigned statuses yet, create default ones
+      if (!projectStatuses || projectStatuses.length === 0) {
+        return []; // Return empty array, defaults will be created in getBoard
+      }
+      
+      // Return the project's statuses
+      return projectStatuses
+        .filter(ps => ps.status) // Filter out any null statuses
+        .map(ps => ps.status);
     } catch (e) {
       console.error("Error fetching statuses:", e);
       return [];
     }
   },
   
-  // Create a new status
-  createStatus: async (name, color = '#E0E0E0') => {
+  // Create a new status and assign it to a project
+  createStatus: async (name, color = '#E0E0E0', projectId = null) => {
     try {
       // Check if status already exists (case insensitive)
       const { data: existingStatus } = await supabase
@@ -63,29 +82,61 @@ export const boardService = {
         .ilike("name", name)
         .maybeSingle();
       
+      let statusId;
+      let status;
+      
       if (existingStatus) {
-        return existingStatus;
+        statusId = existingStatus.id;
+        status = existingStatus;
+      } else {
+        // Create new status
+        const newStatus = {
+          id: uuidv4(),
+          name,
+          color
+        };
+        
+        const { data, error } = await supabase
+          .from("status")
+          .insert(newStatus)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Error creating status:", error);
+          throw error;
+        }
+        
+        statusId = data.id;
+        status = data || newStatus;
       }
       
-      // Create new status
-      const newStatus = {
-        id: uuidv4(),
-        name,
-        color
-      };
-      
-      const { data, error } = await supabase
-        .from("status")
-        .insert(newStatus)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error("Error creating status:", error);
-        throw error;
+      // If projectId is provided, associate this status with the project
+      if (projectId) {
+        // Check if association already exists
+        const { data: existingAssoc } = await supabase
+          .from("project_status")
+          .select("*")
+          .eq("project_id", projectId)
+          .eq("status_id", statusId)
+          .maybeSingle();
+          
+        if (!existingAssoc) {
+          // Create association
+          const { error: assocError } = await supabase
+            .from("project_status")
+            .insert({
+              project_id: projectId,
+              status_id: statusId
+            });
+            
+          if (assocError) {
+            console.error("Error associating status with project:", assocError);
+          }
+        }
       }
       
-      return data || newStatus;
+      return status;
     } catch (e) {
       console.error("Error creating status:", e);
       // Return the input so we don't break the flow
@@ -150,10 +201,10 @@ export const boardService = {
         if (task.priority === 1) priority = 'low';
         else if (task.priority === 3) priority = 'high';
         
-        // Get status - prefer joined status, fall back to status_id
+        // Get status - prefer joined status name as is, fall back to status_id
         let status = 'todo';
         if (task.status && task.status.name) {
-          status = task.status.name.toLowerCase().replace(/\s+/g, '');
+          status = task.status.name;
         } else if (task.status_id) {
           status = task.status_id;
         }
@@ -178,24 +229,15 @@ export const boardService = {
 
   getBoard: async (projectId: string): Promise<Board> => {
     try {
-      // 1. Get all statuses
-      const allStatuses = await boardService.getStatuses();
+      // 1. Get project-specific statuses only
+      const projectStatuses = await boardService.getStatuses(projectId);
       
-      // Create default statuses if none exist
-      if (!allStatuses || allStatuses.length === 0) {
-        const defaultStatuses = [
-          { name: 'To Do', color: '#E0E0E0' },
-          { name: 'In Progress', color: '#90CAF9' },
-          { name: 'Review', color: '#FFD54F' },
-          { name: 'Done', color: '#A5D6A7' }
-        ];
-        
-        for (const status of defaultStatuses) {
-          await boardService.createStatus(status.name, status.color);
-        }
-        
-        // Get statuses again after creating defaults
-        return boardService.getBoard(projectId);
+      // Don't create default statuses - if there are no statuses, return empty board
+      if (!projectStatuses || projectStatuses.length === 0) {
+        return {
+          columns: {},
+          columnOrder: []
+        };
       }
       
       // 2. Get all tasks for this project
@@ -205,9 +247,10 @@ export const boardService = {
       const columns: Record<string, Column> = {};
       const columnOrder: string[] = [];
       
-      // Add columns for all existing statuses
-      for (const status of allStatuses) {
-        const columnId = status.name.toLowerCase().replace(/\s+/g, '');
+      // Add columns for all existing statuses - using status names as is for column IDs
+      for (const status of projectStatuses) {
+        // Use the status name directly as the column ID (no conversion)
+        const columnId = status.name;
         
         columns[columnId] = {
           id: columnId,
@@ -230,8 +273,8 @@ export const boardService = {
       const firstColumn = columnOrder[0];
       
       tasks.forEach(task => {
-        // Find the column for this task's status
-        const columnId = task.status.toLowerCase().replace(/\s+/g, '');
+        // Find the column for this task's status - use status name as is
+        const columnId = task.status;
         
         if (columns[columnId]) {
           // Column exists, add task
@@ -246,35 +289,54 @@ export const boardService = {
     } catch (e) {
       console.error("Error in getBoard:", e);
       
-      // Fallback to a minimal board
+      // Fallback to an empty board - don't create default status
       return {
-        columns: {
-          'todo': { id: 'todo', title: 'To Do', taskIds: [], color: '#E0E0E0' },
-        },
-        columnOrder: ['todo']
+        columns: {},
+        columnOrder: []
       };
     }
   },
 
   createTask: async (task: Partial<Task>): Promise<Task> => {
     try {
-      // First, make sure we have a status for this task
+      if (!task.projectId) {
+        throw new Error('Project ID is required for creating a task');
+      }
+      
+      // First, check if a status is provided
       let statusId = null;
-      let statusName = task.status || 'todo';
+      let statusName = task.status || '';
       
-      // Try to find the status in the database
-      const { data: existingStatus } = await supabase
-        .from("status")
-        .select("*")
-        .eq("name", statusName)
-        .maybeSingle();
-      
-      if (existingStatus) {
-        statusId = existingStatus.id;
+      if (statusName) {
+        // Try to find the status in the database
+        const { data: existingStatus } = await supabase
+          .from("status")
+          .select("*")
+          .ilike("name", statusName)
+          .maybeSingle();
+        
+        if (existingStatus) {
+          statusId = existingStatus.id;
+          
+          // Make sure this status is associated with the project
+          await boardService.associateStatusWithProject(statusId, task.projectId);
+        } else {
+          // Status doesn't exist, create it and associate with project
+          const newStatus = await boardService.createStatus(statusName, undefined, task.projectId);
+          statusId = newStatus.id;
+        }
       } else {
-        // Status doesn't exist, create it
-        const newStatus = await boardService.createStatus(statusName);
-        statusId = newStatus.id;
+        // No status provided - check if project has any statuses
+        const projectStatuses = await boardService.getStatuses(task.projectId);
+        
+        if (projectStatuses && projectStatuses.length > 0) {
+          // Use the first status from the project
+          statusId = projectStatuses[0].id;
+          statusName = projectStatuses[0].name;
+        } else {
+          // Project has no statuses, cannot create task
+          throw new Error('Cannot create task: project has no statuses defined');
+        }
       }
       
       // Convert priority
@@ -315,7 +377,7 @@ export const boardService = {
         id: data.id,
         title: data.title,
         description: data.description,
-        status: statusName.toLowerCase().replace(/\s+/g, ''),
+        status: statusName, // Use the status name as-is
         priority,
         assignedUserId: data.assignee_id,
         projectId: data.project_id,
@@ -328,10 +390,62 @@ export const boardService = {
     }
   },
 
+  // Helper to associate a status with a project
+  associateStatusWithProject: async (statusId, projectId) => {
+    try {
+      if (!statusId || !projectId) {
+        console.warn("Missing status ID or project ID for association");
+        return false;
+      }
+      
+      // Check if association already exists
+      const { data: existingAssoc } = await supabase
+        .from("project_status")
+        .select("*")
+        .eq("project_id", projectId)
+        .eq("status_id", statusId)
+        .maybeSingle();
+        
+      if (!existingAssoc) {
+        // Create association
+        const { error } = await supabase
+          .from("project_status")
+          .insert({
+            project_id: projectId,
+            status_id: statusId
+          });
+          
+        if (error) {
+          console.error("Error creating project_status association:", error);
+          return false;
+        }
+      }
+      
+      return true;
+    } catch (e) {
+      console.error("Error associating status with project:", e);
+      return false;
+    }
+  },
+
   updateTask: async (task: Partial<Task>): Promise<Task> => {
     try {
       if (!task.id) {
         throw new Error('Task ID is required for update');
+      }
+      
+      // Get the current task to get the project ID if not provided
+      let projectId = task.projectId;
+      if (!projectId) {
+        const { data: currentTask } = await supabase
+          .from("tasks")
+          .select("project_id")
+          .eq("id", task.id)
+          .single();
+          
+        if (currentTask) {
+          projectId = currentTask.project_id;
+        }
       }
       
       // Prepare update data
@@ -352,12 +466,8 @@ export const boardService = {
       
       // Handle status
       if (task.status !== undefined) {
-        // Get original status name (before normalization)
+        // Use the status name exactly as provided
         let statusName = task.status;
-        
-        // If it's a normalized status (e.g., "inprogress"), convert to proper name
-        if (task.status === 'inprogress') statusName = 'In Progress';
-        else if (task.status === 'todo') statusName = 'To Do';
         
         // Try to find existing status
         const { data: existingStatus } = await supabase
@@ -368,8 +478,17 @@ export const boardService = {
         
         if (existingStatus) {
           updateData.status_id = existingStatus.id;
+          
+          // Associate status with project if we have project ID
+          if (projectId) {
+            await boardService.associateStatusWithProject(existingStatus.id, projectId);
+          }
+        } else if (projectId) {
+          // Create new status if needed and associate with project
+          const newStatus = await boardService.createStatus(statusName, undefined, projectId);
+          updateData.status_id = newStatus.id;
         } else {
-          // Create new status if needed
+          // Create status without project association
           const newStatus = await boardService.createStatus(statusName);
           updateData.status_id = newStatus.id;
         }
@@ -401,7 +520,8 @@ export const boardService = {
         if (data.priority === 1) priority = 'low';
         else if (data.priority === 3) priority = 'high';
         
-        let status = data.status?.name?.toLowerCase().replace(/\s+/g, '') || 'todo';
+        // Use the status name as-is
+        let status = data.status?.name || 'todo';
         
         return {
           id: data.id,
@@ -441,7 +561,8 @@ export const boardService = {
       if (data.priority === 1) priority = 'low';
       else if (data.priority === 3) priority = 'high';
       
-      let status = data.status?.name?.toLowerCase().replace(/\s+/g, '') || task.status || 'todo';
+      // Use the status name as-is
+      let status = data.status?.name || task.status || 'todo';
       
       return {
         id: data.id,
@@ -482,7 +603,7 @@ export const boardService = {
       // Process each update individually
       const updates = [];
       
-      // 1. Ensure all columns exist as statuses
+      // 1. Ensure all columns exist as statuses and are associated with this project
       for (const columnId in columns) {
         const column = columns[columnId];
         
@@ -505,9 +626,12 @@ export const boardService = {
               .update({ color: column.color })
               .eq("id", statusId);
           }
+          
+          // Ensure status is associated with this project
+          await boardService.associateStatusWithProject(statusId, projectId);
         } else {
-          // Create new status
-          const newStatus = await boardService.createStatus(statusName, column.color);
+          // Create new status and associate with project
+          const newStatus = await boardService.createStatus(statusName, column.color, projectId);
           statusId = newStatus.id;
         }
         
@@ -516,8 +640,7 @@ export const boardService = {
           const update = supabase
             .from("tasks")
             .update({ status_id: statusId })
-            .eq("id", taskId)
-            .eq("project_id", projectId);
+            .eq("id", taskId);
           
           updates.push(update);
         }
@@ -526,7 +649,11 @@ export const boardService = {
       // Execute all updates
       await Promise.all(updates);
       
-      return { columns, columnOrder };
+      // Slight delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Get the updated board to ensure we have the latest state
+      return boardService.getBoard(projectId);
     } catch (e) {
       console.error("Error in updateBoard:", e);
       // Return the input to avoid breaking the UI
