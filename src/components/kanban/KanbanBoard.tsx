@@ -10,7 +10,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
-import { User, Column as ColumnType } from '@/types/kanban';
+import { Board, User, Column as ColumnType } from '@/types/kanban';
 import Column from './Column';
 import SearchBar from './SearchBar';
 import FilterMenu from './FilterMenu';
@@ -21,6 +21,7 @@ import ColumnAddButton from './ColumnAddButton';
 import { PlusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { boardService } from '@/utils/boardService'
 
 interface KanbanBoardProps {
   projectId: string;
@@ -112,17 +113,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setTaskDetailOpen(false);
   }
 
-  const handleSaveTask = (task: Partial<any>) => {
+  const handleSaveTask = async (task: Partial<any>) => {
     if (editingTask) {
       onTaskUpdate(task);
     } else {
       const newTask = {
         ...task,
-        status: initialTaskStatus,
         projectId: projectId,
       };
       onTaskCreate(newTask);
     }
+    const board = await boardService.getBoard(projectId)
+    onBoardUpdate(columns, columnOrder)
   };
 
   // Column handlers

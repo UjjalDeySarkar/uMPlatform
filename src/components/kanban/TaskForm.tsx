@@ -95,6 +95,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       projectId,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
     };
+    debugger
     
     onSave(updatedTask);
     onOpenChange(false);

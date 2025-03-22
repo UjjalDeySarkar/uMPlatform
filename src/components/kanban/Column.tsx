@@ -74,7 +74,7 @@ const Column: React.FC<ColumnProps> = ({
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={() => onAddTask(column.id)}
+            onClick={() => onAddTask(column.title)}
           >
             <PlusIcon className="h-4 w-4" />
           </Button>

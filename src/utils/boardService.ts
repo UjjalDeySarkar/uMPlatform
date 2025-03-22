@@ -298,6 +298,7 @@ export const boardService = {
   },
 
   createTask: async (task: Partial<Task>): Promise<Task> => {
+    debugger
     try {
       if (!task.projectId) {
         throw new Error('Project ID is required for creating a task');
@@ -318,33 +319,25 @@ export const boardService = {
         if (existingStatus) {
           statusId = existingStatus.id;
           
-          // Make sure this status is associated with the project
           await boardService.associateStatusWithProject(statusId, task.projectId);
         } else {
-          // Status doesn't exist, create it and associate with project
-          const newStatus = await boardService.createStatus(statusName, undefined, task.projectId);
-          statusId = newStatus.id;
+          throw new Error('Cannot create task: the status is not defined');
         }
       } else {
-        // No status provided - check if project has any statuses
         const projectStatuses = await boardService.getStatuses(task.projectId);
         
         if (projectStatuses && projectStatuses.length > 0) {
-          // Use the first status from the project
           statusId = projectStatuses[0].id;
           statusName = projectStatuses[0].name;
         } else {
-          // Project has no statuses, cannot create task
           throw new Error('Cannot create task: project has no statuses defined');
         }
       }
       
-      // Convert priority
       let numericPriority = 2; // Default to medium
       if (task.priority === 'low') numericPriority = 1;
       else if (task.priority === 'high') numericPriority = 3;
       
-      // Create task
       const newTask = {
         id: uuidv4(),
         title: task.title || 'New Task',
